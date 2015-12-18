@@ -14,4 +14,3 @@ RUN apk-install mysql && \
     } > /etc/mysql/my.cnf
 VOLUME ["/var/lib/mysql", "/etc/mysql/conf.d/"]
 ENTRYPOINT ["mysqld"]
-CMD ["--skip-grant-tables"]
