@@ -1,16 +1,21 @@
-FROM gliderlabs/alpine:3.1 
-MAINTAINER Dmitry Gavriloff <info@imega.ru> 
-EXPOSE 3306 
-RUN apk-install mysql && \
-    mkdir -p /var/lib/mysql && \
-    mkdir -p /etc/mysql/conf.d && \
-    { \
-        echo '[mysqld]'; \
-        echo 'user = root'; \
-        echo 'datadir = /var/lib/mysql'; \
-        echo 'port = 3306'; \
-        echo 'log-bin = /var/lib/mysql/mysql-bin'; \
-        echo '!includedir /etc/mysql/conf.d/'; \
-    } > /etc/mysql/my.cnf
-VOLUME ["/var/lib/mysql", "/etc/mysql/conf.d/"]
-ENTRYPOINT ["mysqld"]
+FROM alpine:latest
+MAINTAINER Philip Van <phucvd.ce@gmail.com>
+
+COPY ./entrypoint.sh /
+
+RUN chmod +x /entrypoint.sh \
+ && apk --update add mariadb \
+ && addgroup mysql mysql \
+ && rm -rf /var/lib/mysql \
+ && mkdir -p /var/lib/mysql \
+ && chown -R mysql:mysql /var/lib/mysql \
+ && chown -R mysql:mysql /etc/mysql/ \
+ && rm -rf /var/cache/apk/*
+
+VOLUME /var/lib/mysql /var/log/mysql /etc/mysql/ /tmp
+
+EXPOSE 3306
+USER mysql
+
+ENTRYPOINT [ "/entrypoint.sh" ]
+CMD [ "mysqld", "--user=mysql" ]
